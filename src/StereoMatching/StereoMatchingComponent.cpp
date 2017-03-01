@@ -27,6 +27,9 @@
  * Reads stereo camera images and intrinsics to generate a depth map
  *
  * @author Philipp Müller
+ * @TODO:	
+ *		- Read camera calibration from ubitrack calib files
+ *		- Fix heatmap display of disparity / depth map
  */
 
 #include <string>
@@ -164,7 +167,7 @@ void StereoMatchingComponent::stereoMatching(Measurement::Timestamp timeStamp)
 		STEREO_3WAY = 4		// Semi global block matching (???)
 	};
 	int alg = STEREO_HH;
-	int SADWindowSize = 5;			// Sum of absolute differences window size
+	int SADWindowSize = 11;			// Sum of absolute differences window size
 	int numberOfDisparities = 128;	
 	float scale = 1.0f;
 
@@ -222,19 +225,19 @@ void StereoMatchingComponent::stereoMatching(Measurement::Timestamp timeStamp)
 		}
 
 		cv::Mat M1, D1, M2, D2;
-		//fs["M1"] >> M1;
+		fs["M1"] >> M1;
 		fs["D1"] >> D1;
-		//fs["M2"] >> M2;
+		fs["M2"] >> M2;
 		fs["D2"] >> D2;
 
-		Math::Matrix<double, 3, 3> camMat1 = transpose(m_camera1Intrinsics.get(timeStamp)->matrix);
-		Math::Vector4d camDist1 = m_camera1Intrinsics.get(timeStamp)->radial_params;
-		Math::Matrix<double, 3, 3> camMat2 = transpose(m_camera2Intrinsics.get(timeStamp)->matrix);
-		Math::Vector4d camDist2 = m_camera2Intrinsics.get(timeStamp)->radial_params;
+		//Math::Matrix<double, 3, 3> camMat1 = transpose(m_camera1Intrinsics.get(timeStamp)->matrix);
+		//Math::Vector4d camDist1 = m_camera1Intrinsics.get(timeStamp)->radial_params;
+		//Math::Matrix<double, 3, 3> camMat2 = transpose(m_camera2Intrinsics.get(timeStamp)->matrix);
+		//Math::Vector4d camDist2 = m_camera2Intrinsics.get(timeStamp)->radial_params;
 
-		M1 = cv::Mat(3, 3, CV_64FC1, (void*)camMat1.content());
+		//M1 = cv::Mat(3, 3, CV_64FC1, (void*)camMat1.content());
 		//D1 = cv::Mat(1, 4, CV_64FC1, (void*)camDist1.content());
-		M2 = cv::Mat(3, 3, CV_64FC1, (void*)camMat2.content());
+		//M2 = cv::Mat(3, 3, CV_64FC1, (void*)camMat2.content());
 		//D2 = cv::Mat(1, 4, CV_64FC1, (void*)camDist2.content());
 
 		M1 *= scale;
@@ -331,11 +334,11 @@ void StereoMatchingComponent::stereoMatching(Measurement::Timestamp timeStamp)
 		cv::Mat xyz;
 		cv::reprojectImageTo3D(disp, xyz, Q, false, CV_32F);
 
-		cv::Mat heatmap;
-		cv::applyColorMap(xyz, heatmap, cv::ColormapTypes::COLORMAP_HOT);
-
+		//cv::Mat heatmap;
+		//cv::applyColorMap(xyz, heatmap, cv::ColormapTypes::COLORMAP_HOT);
+		//cv::imwrite("C://Users//FAR-Student//Desktop//Phil//heatmap.png", heatmap);
 		//m_outDepthImage.send(Measurement::ImageMeasurement(timeStamp, ImagePtr(new Image(heatMap))));
-		cv::imwrite("C://Users//FAR-Student//Desktop//Phil//heatmap.png", heatmap);
+
 		m_outDepthImage.send(Measurement::ImageMeasurement(timeStamp, ImagePtr(new Image(disp8))));
 	}
 }
